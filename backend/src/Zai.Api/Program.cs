@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
+using Zai.Api.Data;
 using Zai.Api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +20,13 @@ builder.Services
     .ConfigureApiBehaviorOptions(options =>
         options.InvalidModelStateResponseFactory = ApiProblems.InvalidModelState);
 
+builder.Services.AddDbContext<AppDbContext>((services, options) => options
+    .UseNpgsql(services.GetRequiredService<IConfiguration>().GetConnectionString("Default")
+        ?? throw new InvalidOperationException("Connection string 'Default' is not configured."))
+    .UseSnakeCaseNamingConvention());
+
+builder.Services.AddSingleton(TimeProvider.System);
+
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -26,6 +35,11 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 
 var app = builder.Build();
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+}
 
 app.UseForwardedHeaders();
 app.UseExceptionHandler();
@@ -45,4 +59,4 @@ app.MapControllers();
 app.MapFallback("/api/{**path}", () => Results.Problem(statusCode: StatusCodes.Status404NotFound));
 app.MapFallbackToFile("index.html");
 
-app.Run();
+await app.RunAsync();
