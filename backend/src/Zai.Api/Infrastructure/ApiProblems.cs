@@ -7,7 +7,7 @@ public sealed record FieldError(string Field, string Message);
 public static class ApiProblems
 {
     public static ObjectResult Create(HttpContext context, int status, string title, string? detail = null,
-        IEnumerable<FieldError>? errors = null)
+        IEnumerable<FieldError>? errors = null, IDictionary<string, object?>? extensions = null)
     {
         var problem = new ProblemDetails
         {
@@ -21,12 +21,24 @@ public static class ApiProblems
             problem.Extensions["errors"] = errors;
         }
 
+        foreach (var (key, value) in extensions ?? new Dictionary<string, object?>())
+        {
+            problem.Extensions[key] = value;
+        }
+
         return new ObjectResult(problem)
         {
             StatusCode = status,
             ContentTypes = { "application/problem+json" },
         };
     }
+
+    public static ObjectResult NotFound(HttpContext context, string detail) =>
+        Create(context, StatusCodes.Status404NotFound, "Nie znaleziono", detail);
+
+    public static ObjectResult Unprocessable(HttpContext context, IReadOnlyCollection<FieldError> errors) =>
+        Create(context, StatusCodes.Status422UnprocessableEntity, "Niepoprawne dane",
+            string.Join(" ", errors.Select(e => e.Message)), errors);
 
     public static IActionResult InvalidModelState(ActionContext context)
     {
