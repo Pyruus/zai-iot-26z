@@ -38,11 +38,15 @@ builder.Services.Configure<AuthOptions>(authSection);
 
 builder.Services
     .AddAuthentication()
-    .AddScheme<AuthenticationSchemeOptions, AdminSessionHandler>(AuthSchemes.Admin, null);
+    .AddScheme<AuthenticationSchemeOptions, AdminSessionHandler>(AuthSchemes.Admin, null)
+    .AddScheme<AuthenticationSchemeOptions, SensorApiKeyHandler>(AuthSchemes.Sensor, null);
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy(AuthPolicies.Admin, policy => policy
         .AddAuthenticationSchemes(AuthSchemes.Admin)
+        .RequireAuthenticatedUser())
+    .AddPolicy(AuthPolicies.Sensor, policy => policy
+        .AddAuthenticationSchemes(AuthSchemes.Sensor)
         .RequireAuthenticatedUser());
 
 builder.Services.AddRateLimiter(options =>

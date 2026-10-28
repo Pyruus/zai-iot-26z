@@ -19,7 +19,7 @@ services:
     build: .
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
-      ConnectionStrings__Default: Host=db;Port=5432;Database=${POSTGRES_DB:-zai};Username=${POSTGRES_USER:-zai};Password=${POSTGRES_PASSWORD:-zai}
+      ConnectionStrings__Default: Host=db;Port=5432;Database=${POSTGRES_DB:-zai};Username=${POSTGRES_USER:-zai};Password=${POSTGRES_PASSWORD:-zai};Gss Encryption Mode=Disable
     ports:
       - "${API_PORT:-8080}:8080"
     depends_on:
