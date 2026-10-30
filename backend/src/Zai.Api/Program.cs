@@ -11,8 +11,7 @@ using Zai.Api.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails(options =>
-    options.CustomizeProblemDetails = context =>
-        context.ProblemDetails.Instance ??= context.HttpContext.Request.Path);
+    options.CustomizeProblemDetails = ApiProblems.Localize);
 
 builder.Services
     .AddControllers()
