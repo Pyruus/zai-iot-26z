@@ -1,0 +1,62 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN is required}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+    mem_limit: 96m
+
+  api:
+    image: ghcr.io/pyruus/zai-iot-26z:${API_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: Host=db;Port=5432;Database=${POSTGRES_DB:-zai};Username=${POSTGRES_USER:-zai};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required};Gss Encryption Mode=Disable
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 320m
+
+  db:
+    image: timescale/timescaledb:latest-pg17
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - shared_buffers=128MB
+      - -c
+      - effective_cache_size=384MB
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=32MB
+      - -c
+      - max_connections=30
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-zai}
+      POSTGRES_USER: ${POSTGRES_USER:-zai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      NO_TS_TUNE: "true"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 384m
+
+volumes:
+  caddy-data:
+  caddy-config:
+  db-data:

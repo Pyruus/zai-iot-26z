@@ -28,3 +28,6 @@ __pycache__/
 .vscode/*
 !.vscode/extensions.json
 *.swp
+
+# Deployment
+deploy/backups/

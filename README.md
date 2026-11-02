@@ -21,4 +21,4 @@ ZAI_ADMIN_PASSWORD='…' docker compose exec -e ZAI_ADMIN_PASSWORD api dotnet Za
 ZAI_ADMIN_PASS='…' python3 generator/seed_demo.py
 ```
 
-Aplikacja działa pod `http://localhost:8080`. Opis generatora: [generator/README.md](generator/README.md).
+Aplikacja działa pod `http://localhost:8080`. Opis generatora: [generator/README.md](generator/README.md), wdrożenie: [deploy/README.md](deploy/README.md).
