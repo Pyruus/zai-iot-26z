@@ -1,5 +1,7 @@
 # ZAI IoT – serie pomiarowe
 
+[![CI](https://github.com/Pyruus/zai-iot-26z/actions/workflows/ci.yml/badge.svg)](https://github.com/Pyruus/zai-iot-26z/actions/workflows/ci.yml)
+
 Aplikacja do zbierania i prezentacji wyników pomiarów z czujników IoT (projekt ZAI 26Z).
 
 | Katalog | Zawartość |
